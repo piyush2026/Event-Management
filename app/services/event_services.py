@@ -1,5 +1,6 @@
 from app.models.events_model import Event
 from sqlalchemy.orm import Session
+from app.schema import event_schema
 
 def create_Event(db: Session, Event_data):
     new_event = Event(
@@ -32,11 +33,20 @@ def delete_event(db: Session, event_id: int):
 
     return event
 
-def Update_Event(
+def Update_event(
         event_id: int,
         Event_data: event_schema.Eventcreate,
-        db:Session, 
+        db: Session
+):
+    event = db.query(Event).filter(Event.id == event_id).first()
 
+    if not event:
+        return None
     
+    for key, value in Event_data.model_dump().items():
+        setattr(event, key, value)
 
-)
+    db.commit()
+    db.refresh(event)
+
+    return event

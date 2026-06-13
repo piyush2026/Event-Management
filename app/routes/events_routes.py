@@ -15,9 +15,15 @@ def CheckHealth():
         "message": "Events Routes is working"
     }
 
-@event_router.post("/add-event", response_model= event_schema.EventResposnse)
+@event_router.get("/about")
+def checkAbout():
+    return {
+        "message": "Updated Routes"
+    }
+
+@event_router.post("/add-event", response_model= event_schema.Eventresponse)
 def AddEvent(
-    data: event_schema.EventCreate,
+    data: event_schema.Eventcreate,
     db: Session = Depends(get_db)
 ):
     return event_services.create_Event(db, data)
@@ -55,3 +61,18 @@ def Delete_event(
         )
     return {"Message": f"Event deleted: {event_id}"} 
 
+
+@event_router.put("/update/{event_id}", response_model= event_schema.Eventresponse)
+def UpdateEvent(
+    event_id = int,
+    Event_data =  event_schema.Eventcreate,
+    db: Session = Depends(get_db)
+):
+    event = event_services.Update_event(event_id, Event_data, db)
+
+    if not event:
+        return HTTPException(
+            status_code = 404,
+            detail = "Not Found"
+        )
+    return event
